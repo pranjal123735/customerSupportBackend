@@ -84,9 +84,23 @@ async function handleIncomingMessage(message, value) {
 }
 
 async function processCustomerRequest(input, customerPhone) {
-  // This is where you'd implement your customer support logic
-  // For now, a simple echo response
-  return `Thank you for your message: "${input}". Our team will assist you shortly.`;
+  try {
+    // Import customer support agent
+    const customerSupportAgent = require('../services/customerSupportAgent');
+    
+    console.log(`🤖 Processing request from ${customerPhone}: "${input}"`);
+    
+    // Use the AI customer support agent to generate response
+    const response = await customerSupportAgent.processMessage(input, customerPhone);
+    
+    console.log(`✅ Generated response: "${response}"`);
+    
+    return response;
+  } catch (error) {
+    console.error('❌ Error processing customer request:', error);
+    // Fallback response if AI fails
+    return "I apologize, but I'm having trouble processing your request right now. Please try again in a moment or contact our support team.";
+  }
 }
 
 // New endpoint for Railway webhook service to forward messages
