@@ -189,7 +189,7 @@ router.post('/message', async (req, res) => {
         console.log(`🌍 Detecting language with Gemini...`);
         const { GoogleGenerativeAI } = require('@google/generative-ai');
         const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
-        const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        const model = genai.getGenerativeModel({ model: 'gemini-2.5-flash' });
         
         const languageDetectionPrompt = `Detect the language of this text and return ONLY "english" or "hindi":
 
