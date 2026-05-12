@@ -94,11 +94,23 @@ async function processCustomerRequest(input, customerPhone) {
     await customerSupportAgent.waitForInitialization();
     
     // Use the AI customer support agent to generate response
-    const response = await customerSupportAgent.handleCustomerMessage(input, customerPhone, []);
+    const aiResponse = await customerSupportAgent.handleCustomerMessage(input, customerPhone, []);
     
-    console.log(`✅ Generated response: "${response}"`);
+    // Extract the response text from the AI response object
+    let responseText;
+    if (typeof aiResponse === 'string') {
+      responseText = aiResponse;
+    } else if (aiResponse && aiResponse.response) {
+      responseText = aiResponse.response;
+    } else if (aiResponse && aiResponse.text) {
+      responseText = aiResponse.text;
+    } else {
+      responseText = JSON.stringify(aiResponse);
+    }
     
-    return response;
+    console.log(`✅ Generated response: "${responseText}"`);
+    
+    return responseText;
   } catch (error) {
     console.error('❌ Error processing customer request:', error);
     // Fallback response if AI fails
