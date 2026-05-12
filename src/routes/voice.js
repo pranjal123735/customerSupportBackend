@@ -13,6 +13,26 @@ router.post("/stt", upload.single("audio"), async (req, res) => {
       return res.status(400).json({ error: "No audio file provided" });
     }
 
+    // Validate audio file
+    const fileSize = req.file.size;
+    const mimeType = req.file.mimetype;
+    
+    // Check file size (max 25MB for WhatsApp)
+    if (fileSize > 25 * 1024 * 1024) {
+      return res.status(400).json({ error: "Audio file too large (max 25MB)" });
+    }
+
+    // Check file size (min 100 bytes)
+    if (fileSize < 100) {
+      return res.status(400).json({ error: "Audio file too small (min 100 bytes)" });
+    }
+
+    // Validate MIME type
+    const validMimeTypes = ['audio/wav', 'audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/x-wav'];
+    if (!validMimeTypes.includes(mimeType)) {
+      console.warn(`⚠️ Unsupported MIME type: ${mimeType}. Attempting to process anyway.`);
+    }
+
     console.log("🎤 Received audio file for STT processing:");
     console.log("📊 File info:", {
       originalName: req.file.originalname,
@@ -41,13 +61,28 @@ router.post("/stt", upload.single("audio"), async (req, res) => {
   }
 });
 
-// Test TTS endpoint
+// Test TTS endpoint - returns audio buffer directly
 router.post("/tts", async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, returnJson = false } = req.body;
 
     if (!text) {
       return res.status(400).json({ error: "No text provided" });
+    }
+
+    // Validate text input
+    if (typeof text !== 'string') {
+      return res.status(400).json({ error: "Text must be a string" });
+    }
+
+    // Check text length (max 1000 characters for TTS)
+    if (text.length > 1000) {
+      return res.status(400).json({ error: "Text too long (max 1000 characters)" });
+    }
+
+    // Check text length (min 1 character)
+    if (text.trim().length === 0) {
+      return res.status(400).json({ error: "Text cannot be empty" });
     }
 
     console.log("🔊 Received TTS request for:", text.substring(0, 50) + "...");
@@ -61,13 +96,18 @@ router.post("/tts", async (req, res) => {
       mimeType: ttsResult.mimeType,
     });
 
-    res.set({
-      "Content-Type": ttsResult.mimeType,
-      "Content-Length": ttsResult.buffer.length,
-      "Content-Disposition": `attachment; filename="audio_${Date.now()}.wav"`,
-    });
+    // Option 1: Return audio buffer directly (default)
+    if (!returnJson) {
+      res.set({
+        "Content-Type": ttsResult.mimeType,
+        "Content-Length": ttsResult.buffer.length,
+        "Content-Disposition": `attachment; filename="audio_${Date.now()}.wav"`,
+        "X-File-Path": ttsResult.filePath, // Include file path in header for reference
+      });
+      return res.send(ttsResult.buffer);
+    }
 
-    // Return both buffer and file path info
+    // Option 2: Return JSON with file path (for backward compatibility)
     res.json({
       status: "success",
       message: "Audio generated successfully",

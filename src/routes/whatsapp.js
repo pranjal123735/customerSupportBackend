@@ -54,28 +54,48 @@ async function handleIncomingMessage(message, value) {
       const audioId = message.audio.id;
       console.log(`🎵 Processing voice message: ${audioId}`);
       
-      // Download and process voice message
-      const audioUrl = await whatsappService.getMediaUrl(audioId);
-      const audioBuffer = await whatsappService.downloadMedia(audioUrl);
-      
-      // Convert speech to text
-      const transcription = await voiceProcessor.speechToText(audioBuffer);
-      console.log(`📝 Transcription: ${transcription}`);
-      
-      // Process customer request and generate response
-      const response = await processCustomerRequest(transcription, from);
-      
-      // Convert response to speech and send back
-      const audioResponse = await voiceProcessor.textToSpeech(response);
-      await whatsappService.sendVoiceMessage(from, audioResponse);
+      try {
+        // Download and process voice message
+        const audioUrl = await whatsappService.getMediaUrl(audioId);
+        const audioBuffer = await whatsappService.downloadMedia(audioUrl);
+        
+        // Convert speech to text
+        const transcription = await voiceProcessor.speechToText(audioBuffer);
+        console.log(`📝 Transcription: ${transcription}`);
+        
+        // Process customer request and generate response
+        const response = await processCustomerRequest(transcription, from);
+        
+        // Convert response to speech and send back
+        const audioResponse = await voiceProcessor.textToSpeech(response);
+        
+        // Extract buffer from TTS response object
+        const audioBuffer_response = audioResponse.buffer || audioResponse;
+        
+        // Send voice message back
+        await whatsappService.sendVoiceMessage(from, audioBuffer_response);
+        console.log(`✅ Voice response sent to ${from}`);
+      } catch (error) {
+        console.error(`❌ Error processing voice message: ${error.message}`);
+        // Send text fallback if voice fails
+        const fallbackResponse = "I apologize, but I'm having trouble processing your voice message. Please try again or send a text message.";
+        await whatsappService.sendTextMessage(from, fallbackResponse);
+      }
       
     } else if (message.type === 'text') {
       // Handle text messages as fallback
       const text = message.text.body;
       console.log(`💬 Text message: ${text}`);
       
-      const response = await processCustomerRequest(text, from);
-      await whatsappService.sendTextMessage(from, response);
+      try {
+        const response = await processCustomerRequest(text, from);
+        await whatsappService.sendTextMessage(from, response);
+        console.log(`✅ Text response sent to ${from}`);
+      } catch (error) {
+        console.error(`❌ Error processing text message: ${error.message}`);
+        const fallbackResponse = "I apologize, but I'm having trouble processing your request. Please try again.";
+        await whatsappService.sendTextMessage(from, fallbackResponse);
+      }
     }
     
   } catch (error) {
@@ -132,17 +152,36 @@ router.post('/message', async (req, res) => {
 
     // Process the message based on type
     if (messageData.type === 'text') {
-      const response = await processCustomerRequest(messageData.text, messageData.from);
-      await whatsappService.sendTextMessage(messageData.from, response);
+      try {
+        const response = await processCustomerRequest(messageData.text, messageData.from);
+        await whatsappService.sendTextMessage(messageData.from, response);
+        console.log(`✅ Text response sent via webhook service`);
+      } catch (error) {
+        console.error(`❌ Error processing text message: ${error.message}`);
+        const fallbackResponse = "I apologize, but I'm having trouble processing your request. Please try again.";
+        await whatsappService.sendTextMessage(messageData.from, fallbackResponse);
+      }
     } else if (messageData.type === 'audio') {
-      // Download and process audio
-      const audioUrl = await whatsappService.getMediaUrl(messageData.audio.id);
-      const audioBuffer = await whatsappService.downloadMedia(audioUrl);
-      const transcription = await voiceProcessor.speechToText(audioBuffer);
-      
-      const response = await processCustomerRequest(transcription, messageData.from);
-      const audioResponse = await voiceProcessor.textToSpeech(response);
-      await whatsappService.sendVoiceMessage(messageData.from, audioResponse);
+      try {
+        // Download and process audio
+        const audioUrl = await whatsappService.getMediaUrl(messageData.audio.id);
+        const audioBuffer = await whatsappService.downloadMedia(audioUrl);
+        const transcription = await voiceProcessor.speechToText(audioBuffer);
+        
+        const response = await processCustomerRequest(transcription, messageData.from);
+        const audioResponse = await voiceProcessor.textToSpeech(response);
+        
+        // Extract buffer from TTS response object
+        const audioBuffer_response = audioResponse.buffer || audioResponse;
+        
+        // Send voice message back
+        await whatsappService.sendVoiceMessage(messageData.from, audioBuffer_response);
+        console.log(`✅ Voice response sent via webhook service`);
+      } catch (error) {
+        console.error(`❌ Error processing voice message: ${error.message}`);
+        const fallbackResponse = "I apologize, but I'm having trouble processing your voice message. Please try again or send a text message.";
+        await whatsappService.sendTextMessage(messageData.from, fallbackResponse);
+      }
     }
 
     res.status(200).json({ success: true, message: 'Message processed' });

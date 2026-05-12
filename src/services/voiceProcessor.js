@@ -58,6 +58,15 @@ class VoiceProcessor {
       console.log("🎤 Processing speech-to-text...");
       console.log("📊 Audio buffer size:", audioBuffer.length, "bytes");
 
+      // Validate audio buffer
+      if (!audioBuffer || audioBuffer.length === 0) {
+        throw new Error("Audio buffer is empty");
+      }
+
+      if (audioBuffer.length < 1000) {
+        console.warn("⚠️ Audio buffer is very small (<1KB) - may result in poor transcription");
+      }
+
       // Save buffer to temporary file for processing
       const tempFilePath = path.join(
         __dirname,
@@ -78,7 +87,7 @@ class VoiceProcessor {
       // Try local Whisper
       try {
         console.log(`🤖 Trying Local Whisper (${this.whisperModelSize})...`);
-        const transcription = await this.localWhisperSTT(tempFilePath);
+        const result = await this.localWhisperSTT(tempFilePath);
 
         // Clean up temp file
         if (fs.existsSync(tempFilePath)) {
@@ -86,8 +95,15 @@ class VoiceProcessor {
           console.log("🗑️ Cleaned up temp file");
         }
 
-        console.log("✅ STT completed:", transcription);
-        return transcription;
+        // Check confidence threshold
+        if (result.confidence && result.confidence < 0.6) {
+          console.warn(`⚠️ Low confidence transcription (${(result.confidence * 100).toFixed(1)}%)`);
+          console.warn(`📝 Transcription: "${result.text}"`);
+          // Still return it, but log the warning
+        }
+
+        console.log("✅ STT completed:", result.text);
+        return result.text;
       } catch (whisperError) {
         console.log("⚠️ Local Whisper failed, using simulation...");
         console.error("Error details:", whisperError.message);
@@ -136,8 +152,29 @@ class VoiceProcessor {
         throw new Error("Empty transcription from Whisper");
       }
 
-      console.log("🤖 Whisper transcription:", transcription);
-      return transcription;
+      // Estimate confidence based on transcription characteristics
+      // This is a heuristic since @xenova/transformers doesn't provide confidence scores
+      let confidence = 0.8; // Default confidence
+      
+      // Reduce confidence if transcription is very short (likely incomplete)
+      if (transcription.length < 5) {
+        confidence = 0.5;
+        console.warn("⚠️ Very short transcription - confidence reduced");
+      }
+      
+      // Reduce confidence if transcription has many special characters (likely noise)
+      const specialCharCount = (transcription.match(/[^a-zA-Z0-9\s]/g) || []).length;
+      if (specialCharCount > transcription.length * 0.3) {
+        confidence = Math.max(0.4, confidence - 0.2);
+        console.warn("⚠️ Many special characters detected - confidence reduced");
+      }
+
+      console.log(`🤖 Whisper transcription: "${transcription}" (confidence: ${(confidence * 100).toFixed(1)}%)`);
+      
+      return {
+        text: transcription,
+        confidence: confidence
+      };
     } catch (error) {
       console.error("❌ Local Whisper STT error:", error.message);
       throw error;
@@ -267,7 +304,9 @@ class VoiceProcessor {
           pythonOptions: ["-u"], // Unbuffered output for real-time logging
         };
 
-        const pythonProcess = PythonShell.run(
+        // PythonShell.run() is callback-based, not event-based
+        // The callback receives (err, results) where results is an array of output lines
+        PythonShell.run(
           pythonScriptPath,
           options,
           (err, results) => {
@@ -299,8 +338,16 @@ class VoiceProcessor {
               return reject(new Error(userMessage));
             }
 
+            // Log Python output
+            if (results && results.length > 0) {
+              console.log("📝 Python output:", results.join("\n"));
+            }
+
+            // Check if output file was created
             if (fs.existsSync(outputPath)) {
+              const fileSize = fs.statSync(outputPath).size;
               console.log("✅ Audio file generated:", outputPath);
+              console.log("📊 File size:", fileSize, "bytes");
               resolve(outputPath);
             } else {
               reject(
@@ -311,15 +358,6 @@ class VoiceProcessor {
             }
           },
         );
-
-        // Capture stderr for better error reporting
-        pythonProcess.on("stderr", (stderr) => {
-          if (stderr.includes("WARNING")) {
-            console.warn("⚠️ Python Warning:", stderr);
-          } else if (stderr.includes("ERROR") || stderr.includes("Exception")) {
-            console.error("❌ Python Error Output:", stderr);
-          }
-        });
       });
     } catch (error) {
       console.error("❌ Piper TTS error:", error.message);
