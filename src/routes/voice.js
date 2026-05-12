@@ -1,205 +1,291 @@
-const express = require('express');
-const multer = require('multer');
+const express = require("express");
+const multer = require("multer");
 const router = express.Router();
-const voiceProcessor = require('../services/voiceProcessor');
-const supportAgent = require('../services/customerSupportAgent');
+const voiceProcessor = require("../services/voiceProcessor");
+const supportAgent = require("../services/customerSupportAgent");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Real STT endpoint - processes actual audio
-router.post('/stt', upload.single('audio'), async (req, res) => {
+router.post("/stt", upload.single("audio"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No audio file provided' });
+      return res.status(400).json({ error: "No audio file provided" });
     }
+
+    // Validate audio file
+    const fileSize = req.file.size;
+    const mimeType = req.file.mimetype;
     
-    console.log('🎤 Received audio file for STT processing:');
-    console.log('📊 File info:', {
+    // Check file size (max 25MB for WhatsApp)
+    if (fileSize > 25 * 1024 * 1024) {
+      return res.status(400).json({ error: "Audio file too large (max 25MB)" });
+    }
+
+    // Check file size (min 100 bytes)
+    if (fileSize < 100) {
+      return res.status(400).json({ error: "Audio file too small (min 100 bytes)" });
+    }
+
+    // Validate MIME type
+    const validMimeTypes = ['audio/wav', 'audio/mpeg', 'audio/mp3', 'audio/ogg', 'audio/webm', 'audio/x-wav'];
+    if (!validMimeTypes.includes(mimeType)) {
+      console.warn(`⚠️ Unsupported MIME type: ${mimeType}. Attempting to process anyway.`);
+    }
+
+    console.log("🎤 Received audio file for STT processing:");
+    console.log("📊 File info:", {
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
-      size: req.file.size + ' bytes'
+      size: req.file.size + " bytes",
     });
-    
+
     // Process the actual audio buffer
     const transcription = await voiceProcessor.speechToText(req.file.buffer);
-    
-    console.log('✅ STT Result:', transcription);
-    
-    res.json({ 
+
+    console.log("✅ STT Result:", transcription);
+
+    res.json({
       transcription,
       audioInfo: {
         size: req.file.size,
         type: req.file.mimetype,
-        originalName: req.file.originalname
-      }
+        originalName: req.file.originalname,
+      },
     });
-    
   } catch (error) {
-    console.error('❌ STT Error:', error);
-    res.status(500).json({ error: 'Speech to text conversion failed: ' + error.message });
+    console.error("❌ STT Error:", error);
+    res
+      .status(500)
+      .json({ error: "Speech to text conversion failed: " + error.message });
   }
 });
 
-// Test TTS endpoint
-router.post('/tts', async (req, res) => {
+// Test TTS endpoint - returns audio buffer directly
+router.post("/tts", async (req, res) => {
   try {
-    const { text } = req.body;
-    
+    const { text, returnJson = false } = req.body;
+
     if (!text) {
-      return res.status(400).json({ error: 'No text provided' });
+      return res.status(400).json({ error: "No text provided" });
     }
-    
-    // Mock TTS for demo (replace with actual OpenAI when API key is added)
-    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key') {
-      // Return a simple beep sound as placeholder
-      const fs = require('fs');
-      const path = require('path');
-      
-      // Create a simple audio buffer (silence)
-      const sampleRate = 22050;
-      const duration = 2; // 2 seconds
-      const samples = sampleRate * duration;
-      const buffer = Buffer.alloc(samples * 2); // 16-bit audio
-      
-      res.set({
-        'Content-Type': 'audio/wav',
-        'Content-Length': buffer.length
-      });
-      
-      return res.send(buffer);
+
+    // Validate text input
+    if (typeof text !== 'string') {
+      return res.status(400).json({ error: "Text must be a string" });
     }
-    
-    const audioBuffer = await voiceProcessor.textToSpeech(text);
-    
-    res.set({
-      'Content-Type': 'audio/mpeg',
-      'Content-Length': audioBuffer.length
+
+    // Check text length (max 1000 characters for TTS)
+    if (text.length > 1000) {
+      return res.status(400).json({ error: "Text too long (max 1000 characters)" });
+    }
+
+    // Check text length (min 1 character)
+    if (text.trim().length === 0) {
+      return res.status(400).json({ error: "Text cannot be empty" });
+    }
+
+    console.log("🔊 Received TTS request for:", text.substring(0, 50) + "...");
+
+    // Generate audio using Piper TTS
+    const ttsResult = await voiceProcessor.textToSpeech(text);
+
+    console.log("✅ TTS Result:", {
+      filePath: ttsResult.filePath,
+      size: ttsResult.buffer.length,
+      mimeType: ttsResult.mimeType,
     });
-    
-    res.send(audioBuffer);
+
+    // Option 1: Return audio buffer directly (default)
+    if (!returnJson) {
+      res.set({
+        "Content-Type": ttsResult.mimeType,
+        "Content-Length": ttsResult.buffer.length,
+        "Content-Disposition": `attachment; filename="audio_${Date.now()}.wav"`,
+        "X-File-Path": ttsResult.filePath, // Include file path in header for reference
+      });
+      return res.send(ttsResult.buffer);
+    }
+
+    // Option 2: Return JSON with file path (for backward compatibility)
+    res.json({
+      status: "success",
+      message: "Audio generated successfully",
+      file_path: ttsResult.filePath,
+      size: ttsResult.buffer.length,
+      mimeType: ttsResult.mimeType,
+    });
   } catch (error) {
-    console.error('TTS Error:', error);
-    res.status(500).json({ error: 'Text to speech conversion failed' });
+    console.error("❌ TTS Error:", error);
+    res
+      .status(500)
+      .json({ error: "Text to speech conversion failed: " + error.message });
+  }
+});
+
+// GET audio file endpoint - download generated audio
+router.get("/audio/:filename", (req, res) => {
+  try {
+    const fs = require("fs");
+    const path = require("path");
+
+    const filename = req.params.filename;
+    const outputDir = process.env.TTS_OUTPUT_DIR || "./outputs";
+    const filePath = path.join(outputDir, filename);
+
+    // Security: Prevent directory traversal attacks
+    if (!path.resolve(filePath).startsWith(path.resolve(outputDir))) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.log("❌ Audio file not found:", filePath);
+      return res.status(404).json({ error: "Audio file not found" });
+    }
+
+    console.log("📥 Serving audio file:", filename);
+
+    res.set({
+      "Content-Type": "audio/wav",
+      "Content-Disposition": `attachment; filename="${filename}"`,
+    });
+
+    const stream = fs.createReadStream(filePath);
+    stream.pipe(res);
+  } catch (error) {
+    console.error("❌ Audio serving error:", error);
+    res.status(500).json({ error: "Failed to serve audio file" });
   }
 });
 
 // Advanced AI Chat endpoint
-router.post('/chat', async (req, res) => {
+router.post("/chat", async (req, res) => {
   try {
-    const { message, conversationHistory = [], userId = 'default' } = req.body;
-    
+    const { message, conversationHistory = [], userId = "default" } = req.body;
+
     // Handle empty or missing message
     if (!message || message.trim().length === 0) {
-      return res.json({ 
-        response: "Hello! I'm here to help you with any questions about your orders, returns, billing, or our policies. What can I assist you with today?",
-        intent: 'greeting',
+      return res.json({
+        response:
+          "Hello! I'm here to help you with any questions about your orders, returns, billing, or our policies. What can I assist you with today?",
+        intent: "greeting",
         entities: {},
-        sources: []
+        sources: [],
       });
     }
-    
-    console.log('🎯 Chat request received:', { message, userId });
-    
+
+    console.log("🎯 Chat request received:", { message, userId });
+
     // Use Customer Support Agent
-    const result = await supportAgent.handleCustomerMessage(message, userId, conversationHistory);
-    
-    console.log('✅ Support agent response:', result.response.substring(0, 100) + '...');
-    
+    const result = await supportAgent.handleCustomerMessage(
+      message,
+      userId,
+      conversationHistory,
+    );
+
+    console.log(
+      "✅ Support agent response:",
+      result.response.substring(0, 100) + "...",
+    );
+
     res.json({
       response: result.response,
       action: result.action,
       resolved: result.resolved,
       escalated: result.escalated || false,
       ticketId: result.ticketId,
-      intent: 'support_agent',
+      intent: "support_agent",
       entities: {},
-      sources: ['customer_support_agent']
+      sources: ["customer_support_agent"],
     });
   } catch (error) {
-    console.error('AI Chat Error:', error);
-    res.status(500).json({ 
-      error: 'Failed to generate AI response',
-      response: "I apologize, but I'm having trouble processing your request right now. Please try again.",
-      intent: 'error',
+    console.error("AI Chat Error:", error);
+    res.status(500).json({
+      error: "Failed to generate AI response",
+      response:
+        "I apologize, but I'm having trouble processing your request right now. Please try again.",
+      intent: "error",
       entities: {},
-      sources: []
+      sources: [],
     });
   }
 });
 
 // Knowledge base search endpoint (uses MongoDB now, not dummyDatabase)
-router.get('/knowledge/search', async (req, res) => {
+router.get("/knowledge/search", async (req, res) => {
   try {
     const { q: query } = req.query;
-    
+
     if (!query) {
       return res.status(400).json({ error: 'Query parameter "q" is required' });
     }
-    
-    const ragService = require('../services/realRagService');
-    
+
+    const ragService = require("../services/realRagService");
+
     // Use vector search instead of dummyDatabase
     const queryEmbedding = await ragService.createEmbedding(query);
     const results = await ragService.vectorSearch(queryEmbedding, 10);
-    
+
     res.json({
       query,
-      results: results.map(r => ({
+      results: results.map((r) => ({
         title: r.title,
         content: r.content,
         category: r.category,
-        similarity: r.similarity
+        similarity: r.similarity,
       })),
-      totalResults: results.length
+      totalResults: results.length,
     });
   } catch (error) {
-    console.error('Knowledge Search Error:', error);
-    res.status(500).json({ error: 'Failed to search knowledge base' });
+    console.error("Knowledge Search Error:", error);
+    res.status(500).json({ error: "Failed to search knowledge base" });
   }
 });
 
 // Get customer info by email/phone (uses MongoDB now)
-router.post('/customer/lookup', async (req, res) => {
+router.post("/customer/lookup", async (req, res) => {
   try {
     const { email, phone } = req.body;
-    
+
     if (!email && !phone) {
-      return res.status(400).json({ error: 'Email or phone required' });
+      return res.status(400).json({ error: "Email or phone required" });
     }
-    
-    const { MongoClient } = require('mongodb');
+
+    const { MongoClient } = require("mongodb");
     const client = new MongoClient(process.env.MONGODB_URI);
-    
+
     await client.connect();
-    const db = client.db('ecommerce_rag');
-    
+    const db = client.db("ecommerce_rag");
+
     let customer = null;
     let orders = [];
-    
+
     if (email) {
-      customer = await db.collection('customers').findOne({ email });
+      customer = await db.collection("customers").findOne({ email });
     } else if (phone) {
-      customer = await db.collection('customers').findOne({ phone });
+      customer = await db.collection("customers").findOne({ phone });
     }
-    
+
     if (customer) {
-      orders = await db.collection('orders')
+      orders = await db
+        .collection("orders")
         .find({ customer_id: customer.id })
         .sort({ id: -1 })
         .limit(10)
         .toArray();
     }
-    
+
     await client.close();
-    
-    res.json({ 
+
+    res.json({
       customer,
       orders,
-      found: !!customer
+      found: !!customer,
     });
   } catch (error) {
-    console.error('Customer Lookup Error:', error);
-    res.status(500).json({ error: 'Failed to lookup customer' });
+    console.error("Customer Lookup Error:", error);
+    res.status(500).json({ error: "Failed to lookup customer" });
   }
 });
 
