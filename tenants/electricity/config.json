@@ -1,0 +1,102 @@
+{
+  "tenantId": "electricity_powergrid",
+  "businessType": "electricity",
+  "displayName": "PowerGrid Solutions",
+  "industry": "utilities",
+  "language": ["en", "hi"],
+  "timezone": "Asia/Kolkata",
+  "currency": "INR",
+  
+  "entities": {
+    "primary": "account_number",
+    "secondary": ["meter_number", "bill_id", "complaint_id", "location", "amount"]
+  },
+  
+  "intents": [
+    "check_bill",
+    "pay_bill",
+    "report_outage",
+    "request_new_connection",
+    "check_consumption",
+    "complaint",
+    "ask_question"
+  ],
+  
+  "actions": {
+    "check_bill": {
+      "enabled": true,
+      "requiresAuth": true,
+      "handler": "checkBill",
+      "description": "Check current electricity bill"
+    },
+    "pay_bill": {
+      "enabled": true,
+      "requiresAuth": true,
+      "handler": "payBill",
+      "description": "Process bill payment"
+    },
+    "report_outage": {
+      "enabled": true,
+      "requiresAuth": false,
+      "handler": "reportOutage",
+      "description": "Report power outage"
+    },
+    "request_new_connection": {
+      "enabled": true,
+      "requiresAuth": false,
+      "handler": "requestConnection",
+      "description": "Request new electricity connection"
+    },
+    "check_consumption": {
+      "enabled": true,
+      "requiresAuth": true,
+      "handler": "checkConsumption",
+      "description": "Check electricity consumption history"
+    },
+    "answer_question": {
+      "enabled": true,
+      "requiresAuth": false,
+      "handler": "answerQuestion",
+      "description": "Answer general questions about electricity services"
+    }
+  },
+  
+  "database": {
+    "collections": {
+      "customers": "electricity_customers",
+      "bills": "electricity_bills",
+      "outages": "electricity_outages",
+      "connections": "electricity_connections",
+      "complaints": "electricity_complaints",
+      "tickets": "electricity_support_tickets",
+      "knowledge": "electricity_knowledge_base"
+    }
+  },
+  
+  "features": {
+    "voiceSupport": true,
+    "multiLanguage": true,
+    "actionTaking": true,
+    "escalation": true,
+    "semanticCache": true,
+    "longTermMemory": true,
+    "personaSwitching": true,
+    "urgentAlerts": true
+  },
+  
+  "escalation": {
+    "billAmountThreshold": 10000,
+    "maxAttempts": 3,
+    "sentimentThreshold": -0.5,
+    "confidenceThreshold": 0.6,
+    "urgentKeywords": ["no power", "outage", "emergency", "fire", "danger"]
+  },
+  
+  "branding": {
+    "primaryColor": "#10B981",
+    "logo": "/assets/powergrid-logo.png",
+    "supportEmail": "support@powergrid.com",
+    "supportPhone": "+91-1800-POWER-01",
+    "emergencyNumber": "1912"
+  }
+}

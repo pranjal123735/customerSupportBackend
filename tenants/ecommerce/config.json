@@ -1,0 +1,91 @@
+{
+  "tenantId": "ecommerce_store",
+  "businessType": "ecommerce",
+  "displayName": "QuickShop E-commerce",
+  "industry": "retail",
+  "language": ["en", "hi"],
+  "timezone": "Asia/Kolkata",
+  "currency": "INR",
+  
+  "entities": {
+    "primary": "order_id",
+    "secondary": ["tracking_number", "product_name", "email", "amount"]
+  },
+  
+  "intents": [
+    "track_order",
+    "cancel_order",
+    "request_refund",
+    "initiate_return",
+    "change_address",
+    "ask_question",
+    "complaint"
+  ],
+  
+  "actions": {
+    "track_order": {
+      "enabled": true,
+      "requiresAuth": false,
+      "handler": "trackOrder",
+      "description": "Provide order tracking information"
+    },
+    "cancel_order": {
+      "enabled": true,
+      "requiresAuth": true,
+      "handler": "cancelOrder",
+      "description": "Cancel an existing order"
+    },
+    "request_refund": {
+      "enabled": true,
+      "requiresAuth": true,
+      "handler": "processRefund",
+      "description": "Process refund for an order"
+    },
+    "initiate_return": {
+      "enabled": true,
+      "requiresAuth": true,
+      "handler": "initiateReturn",
+      "description": "Start return process for an order"
+    },
+    "answer_question": {
+      "enabled": true,
+      "requiresAuth": false,
+      "handler": "answerQuestion",
+      "description": "Answer general questions using knowledge base"
+    }
+  },
+  
+  "database": {
+    "collections": {
+      "customers": "customers",
+      "orders": "orders",
+      "products": "products",
+      "tickets": "support_tickets",
+      "knowledge": "knowledge_base"
+    }
+  },
+  
+  "features": {
+    "voiceSupport": true,
+    "multiLanguage": true,
+    "actionTaking": true,
+    "escalation": true,
+    "semanticCache": true,
+    "longTermMemory": true,
+    "personaSwitching": true
+  },
+  
+  "escalation": {
+    "refundAmountThreshold": 500,
+    "maxAttempts": 3,
+    "sentimentThreshold": -0.5,
+    "confidenceThreshold": 0.6
+  },
+  
+  "branding": {
+    "primaryColor": "#4F46E5",
+    "logo": "/assets/ecommerce-logo.png",
+    "supportEmail": "support@quickshop.com",
+    "supportPhone": "+91-1800-123-4567"
+  }
+}

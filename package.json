@@ -1,0 +1,35 @@
+{
+  "name": "whatsapp-voice-agent-backend",
+  "version": "1.0.0",
+  "description": "Real RAG-powered WhatsApp Voice Customer Support Agent",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "setup-rag": "python3 setup_real_rag.py",
+    "populate-kb": "node scripts/populateKnowledgeBase.js",
+    "test": "python3 final_assessment.py"
+  },
+  "dependencies": {
+    "@google/genai": "^2.0.1",
+    "@google/generative-ai": "^0.1.3",
+    "@huggingface/inference": "^4.13.15",
+    "@langchain/google-genai": "^2.1.30",
+    "axios": "^1.16.0",
+    "cors": "^2.8.5",
+    "dns2": "^2.1.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "form-data": "^4.0.5",
+    "helmet": "^8.1.0",
+    "langchain": "^1.4.0",
+    "mongodb": "^6.21.0",
+    "morgan": "^1.10.1",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.6",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

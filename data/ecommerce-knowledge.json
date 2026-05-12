@@ -1,0 +1,156 @@
+{
+  "company": {
+    "name": "QuickBite Food Delivery",
+    "description": "Fast food delivery service with 30-minute guarantee",
+    "contact": {
+      "phone": "+1-800-QUICKBITE",
+      "email": "support@quickbite.com",
+      "hours": "24/7 customer support"
+    }
+  },
+  "policies": {
+    "delivery": {
+      "standard_time": "30-45 minutes",
+      "guarantee": "30 minutes or 50% off",
+      "delivery_fee": "$2.99",
+      "free_delivery_minimum": "$25",
+      "coverage_area": "Within 10 miles of restaurant",
+      "weather_policy": "Delivery may be delayed during severe weather"
+    },
+    "refund": {
+      "full_refund_conditions": [
+        "Order not delivered within 60 minutes",
+        "Wrong order delivered",
+        "Food quality issues reported within 30 minutes",
+        "Restaurant cancellation"
+      ],
+      "partial_refund_conditions": [
+        "Missing items (refund for missing items only)",
+        "Late delivery (30-60 minutes gets 25% off)",
+        "Cold food (20% refund)"
+      ],
+      "no_refund_conditions": [
+        "Customer unavailable for delivery",
+        "Wrong address provided by customer",
+        "Order cancelled after restaurant preparation"
+      ],
+      "refund_processing_time": "3-5 business days"
+    },
+    "cancellation": {
+      "free_cancellation": "Within 5 minutes of order placement",
+      "partial_charge": "5-15 minutes: 25% charge",
+      "no_cancellation": "After 15 minutes or when food preparation starts"
+    },
+    "payment": {
+      "accepted_methods": ["Credit Card", "Debit Card", "PayPal", "Apple Pay", "Google Pay"],
+      "payment_processing": "Charged when order is confirmed",
+      "tip_policy": "Tips go 100% to delivery driver",
+      "surge_pricing": "During peak hours (11AM-2PM, 6PM-9PM) +$1-3 delivery fee"
+    }
+  },
+  "menu_categories": [
+    {
+      "name": "Pizza",
+      "popular_items": ["Margherita Pizza", "Pepperoni Pizza", "Supreme Pizza"],
+      "average_prep_time": "15-20 minutes",
+      "dietary_options": ["Gluten-free crust", "Vegan cheese"]
+    },
+    {
+      "name": "Burgers",
+      "popular_items": ["Classic Burger", "Chicken Burger", "Veggie Burger"],
+      "average_prep_time": "10-15 minutes",
+      "dietary_options": ["Plant-based patties", "Gluten-free buns"]
+    },
+    {
+      "name": "Asian Cuisine",
+      "popular_items": ["Pad Thai", "Chicken Teriyaki", "Fried Rice"],
+      "average_prep_time": "12-18 minutes",
+      "dietary_options": ["Vegetarian", "Vegan", "Gluten-free"]
+    },
+    {
+      "name": "Mexican",
+      "popular_items": ["Tacos", "Burritos", "Quesadillas"],
+      "average_prep_time": "8-12 minutes",
+      "dietary_options": ["Vegetarian", "Vegan beans", "Corn tortillas"]
+    }
+  ],
+  "common_issues": {
+    "order_tracking": {
+      "statuses": ["Order Placed", "Restaurant Confirmed", "Preparing", "Out for Delivery", "Delivered"],
+      "tracking_method": "Real-time GPS tracking available in app",
+      "notifications": "SMS and app notifications for status updates"
+    },
+    "food_quality": {
+      "temperature_guarantee": "Food delivered hot (above 140°F for hot items)",
+      "freshness_policy": "All ingredients prepared fresh daily",
+      "allergen_information": "Available for all menu items",
+      "special_requests": "Customizations available for most items"
+    },
+    "delivery_issues": {
+      "driver_not_found": "We'll find another driver within 10 minutes",
+      "wrong_address": "Customer responsible for additional delivery fee",
+      "access_issues": "Driver will call customer for building access",
+      "weather_delays": "Automatic notifications sent for weather-related delays"
+    }
+  },
+  "account_management": {
+    "registration": "Email and phone number required",
+    "password_reset": "Reset link sent to registered email",
+    "profile_updates": "Address, payment methods, dietary preferences",
+    "order_history": "Available for last 12 months",
+    "loyalty_program": {
+      "name": "QuickBite Rewards",
+      "earning": "1 point per $1 spent",
+      "redemption": "100 points = $5 off",
+      "tiers": ["Bronze (0-499 points)", "Silver (500-999 points)", "Gold (1000+ points)"]
+    }
+  },
+  "restaurant_partners": [
+    {
+      "name": "Mario's Pizza Palace",
+      "cuisine": "Italian",
+      "rating": 4.5,
+      "delivery_time": "25-35 minutes",
+      "minimum_order": "$15"
+    },
+    {
+      "name": "Burger Junction",
+      "cuisine": "American",
+      "rating": 4.2,
+      "delivery_time": "20-30 minutes",
+      "minimum_order": "$12"
+    },
+    {
+      "name": "Spice Garden",
+      "cuisine": "Indian",
+      "rating": 4.7,
+      "delivery_time": "30-40 minutes",
+      "minimum_order": "$18"
+    },
+    {
+      "name": "Taco Fiesta",
+      "cuisine": "Mexican",
+      "rating": 4.3,
+      "delivery_time": "15-25 minutes",
+      "minimum_order": "$10"
+    }
+  ],
+  "promotions": {
+    "current_offers": [
+      {
+        "code": "FIRST20",
+        "description": "20% off first order",
+        "minimum_order": "$15",
+        "valid_until": "2026-12-31"
+      },
+      {
+        "code": "FREEDELIV",
+        "description": "Free delivery on orders over $20",
+        "minimum_order": "$20",
+        "valid_until": "2026-06-30"
+      }
+    ],
+    "weekly_deals": "50% off selected restaurants every Tuesday",
+    "student_discount": "15% off with valid student ID"
+  }
+}
