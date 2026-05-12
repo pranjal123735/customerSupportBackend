@@ -90,8 +90,11 @@ async function processCustomerRequest(input, customerPhone) {
     
     console.log(`🤖 Processing request from ${customerPhone}: "${input}"`);
     
+    // Wait for agent to be initialized
+    await customerSupportAgent.waitForInitialization();
+    
     // Use the AI customer support agent to generate response
-    const response = await customerSupportAgent.processMessage(input, customerPhone);
+    const response = await customerSupportAgent.handleCustomerMessage(input, customerPhone, []);
     
     console.log(`✅ Generated response: "${response}"`);
     
