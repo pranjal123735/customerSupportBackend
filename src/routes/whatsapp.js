@@ -185,14 +185,46 @@ router.post('/message', async (req, res) => {
         const transcription = await voiceProcessor.speechToText(audioBuffer);
         console.log(`📝 Transcription: "${transcription}"`);
         
+        // Detect language using Gemini
+        console.log(`🌍 Detecting language with Gemini...`);
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
+        const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+        
+        const languageDetectionPrompt = `Detect the language of this text and return ONLY "english" or "hindi":
+
+Text: "${transcription}"
+
+Return ONLY one word: english or hindi`;
+
+        const languageResult = await model.generateContent(languageDetectionPrompt);
+        const detectedLanguage = languageResult.response.text().trim().toLowerCase();
+        console.log(`🌍 Detected language: ${detectedLanguage}`);
+        
         // Process customer request
         console.log(`🤖 Processing customer request...`);
         const response = await processCustomerRequest(transcription, messageData.from);
         console.log(`✅ AI Response: "${response.substring(0, 100)}..."`);
         
+        // Translate response to match input language using Gemini
+        console.log(`🔄 Translating response to ${detectedLanguage}...`);
+        let finalResponse = response;
+        
+        if (detectedLanguage === 'hindi') {
+          const translationPrompt = `Translate this English text to natural Hindi/Hinglish (mix of Hindi and English):
+
+English text: "${response}"
+
+Return ONLY the Hindi/Hinglish translation:`;
+
+          const translationResult = await model.generateContent(translationPrompt);
+          finalResponse = translationResult.response.text().trim();
+          console.log(`✅ Translated to Hindi: "${finalResponse.substring(0, 100)}..."`);
+        }
+        
         // Convert response to speech
         console.log(`🔊 Converting response to speech...`);
-        const audioResponse = await voiceProcessor.textToSpeech(response);
+        const audioResponse = await voiceProcessor.textToSpeech(finalResponse);
         
         // Extract buffer and MIME type from TTS response object
         const audioBufferResponse = audioResponse.buffer || audioResponse;

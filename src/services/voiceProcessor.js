@@ -180,6 +180,7 @@ class VoiceProcessor {
         } catch (googleCloudError) {
           console.log("⚠️ Google Cloud STT failed, trying AssemblyAI...");
           console.error("Error details:", googleCloudError.message);
+          // Continue to next service
         }
       }
 
@@ -203,6 +204,7 @@ class VoiceProcessor {
         } catch (assemblyAIError) {
           console.log("⚠️ AssemblyAI STT failed, trying local Whisper...");
           console.error("Error details:", assemblyAIError.message);
+          // Continue to fallback
         }
       }
 
@@ -257,8 +259,14 @@ class VoiceProcessor {
         },
       };
 
-      // Call Google Cloud Speech-to-Text API
-      const [response] = await this.googleCloudSTTClient.recognize(request);
+      // Call Google Cloud Speech-to-Text API with timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Google Cloud STT timeout after 10 seconds')), 10000)
+      );
+      
+      const sttPromise = this.googleCloudSTTClient.recognize(request);
+      
+      const [response] = await Promise.race([sttPromise, timeoutPromise]);
 
       const endTime = Date.now();
       const duration = endTime - startTime;
@@ -287,6 +295,12 @@ class VoiceProcessor {
       return transcription;
     } catch (error) {
       console.error("❌ Google Cloud STT error:", error.message);
+      if (error.code) {
+        console.error("Error code:", error.code);
+      }
+      if (error.details) {
+        console.error("Error details:", error.details);
+      }
       throw error;
     }
   }
