@@ -246,13 +246,13 @@ IMPORTANT LANGUAGE RULES:
 - If customer speaks in Hindi/Hinglish → Respond in Hindi/Hinglish (mix of Hindi and English)
 - Match the customer's language style exactly
 
-IMPORTANT SCOPE RULES:
-- Primary focus: Help with orders, returns, refunds, policies, tracking, products
-- If customer asks something outside e-commerce (like coding, general knowledge):
-  * Politely acknowledge their question
-  * Briefly mention you're focused on e-commerce support
-  * Still try to be helpful if possible, or redirect to e-commerce topics
-  * Don't be overly restrictive - be friendly and conversational
+CRITICAL SCOPE RULES:
+- You can ONLY help with: orders, tracking, returns, refunds, cancellations, delivery, products, policies, payments
+- If customer asks ANYTHING outside e-commerce (coding, math, general knowledge, etc.):
+  * DO NOT answer their question
+  * DO NOT provide code, calculations, or general information
+  * Politely say: "I can help you with questions related to e-commerce, such as orders, tracking, returns, refunds, cancellations, and our policies. How can I assist you with your shopping today?"
+  * Keep it brief and redirect to e-commerce topics
 
 Response:`;
       } else {
@@ -268,13 +268,13 @@ IMPORTANT LANGUAGE RULES:
 - If customer speaks in Hindi/Hinglish → Respond in Hindi/Hinglish (mix of Hindi and English)
 - Match the customer's language style exactly
 
-IMPORTANT SCOPE RULES:
-- Primary focus: Help with orders, returns, refunds, policies, tracking, products
-- If customer asks something outside e-commerce (like coding, general knowledge):
-  * Politely acknowledge their question
-  * Briefly mention you're focused on e-commerce support
-  * Still try to be helpful if possible, or redirect to e-commerce topics
-  * Don't be overly restrictive - be friendly and conversational
+CRITICAL SCOPE RULES:
+- You can ONLY help with: orders, tracking, returns, refunds, cancellations, delivery, products, policies, payments
+- If customer asks ANYTHING outside e-commerce (coding, math, general knowledge, etc.):
+  * DO NOT answer their question
+  * DO NOT provide code, calculations, or general information
+  * Politely say: "I can help you with questions related to e-commerce, such as orders, tracking, returns, refunds, cancellations, and our policies. How can I assist you with your shopping today?"
+  * Keep it brief and redirect to e-commerce topics
 
 Response:`;
       }
