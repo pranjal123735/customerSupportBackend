@@ -20,6 +20,9 @@ logs/
 test_*.js
 test_*.json
 
+# Documentation files
+*.md
+
 # Temporary files
 temp/
 tmp/
