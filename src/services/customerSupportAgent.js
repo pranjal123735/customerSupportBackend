@@ -231,7 +231,7 @@ Return ONLY valid JSON:`;
       // Step 7: Generate final response with tool results
       let finalPrompt;
       if (toolResult) {
-        finalPrompt = `You are a helpful customer support agent.
+        finalPrompt = `You are a helpful customer support agent for an e-commerce company.
 
 Customer message: "${userMessage}"
 ${conversationContext}
@@ -240,17 +240,41 @@ Tool used: ${decision.tool}
 Tool result: ${JSON.stringify(toolResult)}
 
 Generate a natural, helpful response based on the tool result.
-Language: ${detectedLanguage === 'hindi' ? 'Hinglish (mix of Hindi and English)' : 'English'}
+
+IMPORTANT LANGUAGE RULES:
+- If customer speaks in English → Respond in English
+- If customer speaks in Hindi/Hinglish → Respond in Hindi/Hinglish (mix of Hindi and English)
+- Match the customer's language style exactly
+
+IMPORTANT SCOPE RULES:
+- Primary focus: Help with orders, returns, refunds, policies, tracking, products
+- If customer asks something outside e-commerce (like coding, general knowledge):
+  * Politely acknowledge their question
+  * Briefly mention you're focused on e-commerce support
+  * Still try to be helpful if possible, or redirect to e-commerce topics
+  * Don't be overly restrictive - be friendly and conversational
 
 Response:`;
       } else {
-        finalPrompt = `You are a helpful customer support agent.
+        finalPrompt = `You are a helpful customer support agent for an e-commerce company.
 
 Customer message: "${userMessage}"
 ${conversationContext}
 
 Generate a natural, helpful response.
-Language: ${detectedLanguage === 'hindi' ? 'Hinglish (mix of Hindi and English)' : 'English'}
+
+IMPORTANT LANGUAGE RULES:
+- If customer speaks in English → Respond in English
+- If customer speaks in Hindi/Hinglish → Respond in Hindi/Hinglish (mix of Hindi and English)
+- Match the customer's language style exactly
+
+IMPORTANT SCOPE RULES:
+- Primary focus: Help with orders, returns, refunds, policies, tracking, products
+- If customer asks something outside e-commerce (like coding, general knowledge):
+  * Politely acknowledge their question
+  * Briefly mention you're focused on e-commerce support
+  * Still try to be helpful if possible, or redirect to e-commerce topics
+  * Don't be overly restrictive - be friendly and conversational
 
 Response:`;
       }
