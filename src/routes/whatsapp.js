@@ -191,15 +191,25 @@ router.post('/message', async (req, res) => {
         const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY);
         const model = genai.getGenerativeModel({ model: 'gemini-2.5-flash' });
         
-        const languageDetectionPrompt = `Detect the language of this text and return ONLY "english" or "hindi":
+        // First check script - if Devanagari characters present, it's Hindi
+        const hasDevanagari = /[\u0900-\u097F]/.test(transcription);
+        let detectedLanguage = 'english';
+        
+        if (hasDevanagari) {
+          detectedLanguage = 'hindi';
+          console.log(`🌍 Detected language: hindi (Devanagari script found)`);
+        } else {
+          // Only use Gemini if no Devanagari - check if it's Hinglish
+          const languageDetectionPrompt = `Is this text in Hindi/Hinglish or English? Return ONLY "hindi" or "english":
 
 Text: "${transcription}"
 
 Return ONLY one word: english or hindi`;
 
-        const languageResult = await model.generateContent(languageDetectionPrompt);
-        const detectedLanguage = languageResult.response.text().trim().toLowerCase();
-        console.log(`🌍 Detected language: ${detectedLanguage}`);
+          const languageResult = await model.generateContent(languageDetectionPrompt);
+          detectedLanguage = languageResult.response.text().trim().toLowerCase();
+          console.log(`🌍 Detected language: ${detectedLanguage} (via Gemini)`);
+        }
         
         // Process customer request
         console.log(`🤖 Processing customer request...`);
