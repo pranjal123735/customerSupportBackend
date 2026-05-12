@@ -89,4 +89,38 @@ async function processCustomerRequest(input, customerPhone) {
   return `Thank you for your message: "${input}". Our team will assist you shortly.`;
 }
 
+// New endpoint for Railway webhook service to forward messages
+router.post('/message', async (req, res) => {
+  try {
+    // Verify API key for security
+    const apiKey = req.headers.authorization?.replace('Bearer ', '');
+    if (apiKey !== process.env.BACKEND_API_KEY) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const messageData = req.body;
+    console.log('📥 Received message from webhook service:', messageData);
+
+    // Process the message based on type
+    if (messageData.type === 'text') {
+      const response = await processCustomerRequest(messageData.text, messageData.from);
+      await whatsappService.sendTextMessage(messageData.from, response);
+    } else if (messageData.type === 'audio') {
+      // Download and process audio
+      const audioUrl = await whatsappService.getMediaUrl(messageData.audio.id);
+      const audioBuffer = await whatsappService.downloadMedia(audioUrl);
+      const transcription = await voiceProcessor.speechToText(audioBuffer);
+      
+      const response = await processCustomerRequest(transcription, messageData.from);
+      const audioResponse = await voiceProcessor.textToSpeech(response);
+      await whatsappService.sendVoiceMessage(messageData.from, audioResponse);
+    }
+
+    res.status(200).json({ success: true, message: 'Message processed' });
+  } catch (error) {
+    console.error('❌ Error processing forwarded message:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
