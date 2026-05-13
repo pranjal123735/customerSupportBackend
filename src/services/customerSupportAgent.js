@@ -435,7 +435,9 @@ Response:`;
         price: order.price,
         tracking_number: order.tracking_number,
         estimated_delivery: order.estimated_delivery,
-        order_date: order.order_date
+        order_date: order.order_date,
+        cancelled_at: order.cancelled_at || null,
+        cancelled_by: order.cancelled_by || null
       }
     };
   }
