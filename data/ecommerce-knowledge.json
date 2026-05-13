@@ -1,156 +1,361 @@
 {
   "company": {
-    "name": "QuickBite Food Delivery",
-    "description": "Fast food delivery service with 30-minute guarantee",
+    "name": "ShopEase Online Store",
+    "description": "Your one-stop online shopping destination for electronics, fashion, home goods, and more",
     "contact": {
-      "phone": "+1-800-QUICKBITE",
-      "email": "support@quickbite.com",
-      "hours": "24/7 customer support"
-    }
+      "phone": "+1-800-SHOPEASE",
+      "email": "support@shopease.com",
+      "hours": "24/7 customer support",
+      "live_chat": "Available 9 AM - 9 PM EST"
+    },
+    "headquarters": "New York, USA",
+    "founded": "2020",
+    "shipping_countries": ["USA", "Canada", "UK", "India", "Australia"]
   },
   "policies": {
-    "delivery": {
-      "standard_time": "30-45 minutes",
-      "guarantee": "30 minutes or 50% off",
-      "delivery_fee": "$2.99",
-      "free_delivery_minimum": "$25",
-      "coverage_area": "Within 10 miles of restaurant",
-      "weather_policy": "Delivery may be delayed during severe weather"
+    "shipping": {
+      "standard_shipping": {
+        "time": "5-7 business days",
+        "cost": "$4.99",
+        "free_threshold": "$50"
+      },
+      "express_shipping": {
+        "time": "2-3 business days",
+        "cost": "$12.99",
+        "free_threshold": "$100"
+      },
+      "overnight_shipping": {
+        "time": "1 business day",
+        "cost": "$24.99",
+        "availability": "Select cities only"
+      },
+      "international_shipping": {
+        "time": "10-15 business days",
+        "cost": "Calculated at checkout",
+        "customs_note": "Customer responsible for customs duties"
+      },
+      "tracking": "Tracking number provided within 24 hours of shipment",
+      "packaging": "Eco-friendly packaging materials used",
+      "delivery_options": ["Home delivery", "Office delivery", "Pickup point"]
+    },
+    "return": {
+      "return_window": "30 days from delivery date",
+      "condition": "Items must be unused, in original packaging with tags attached",
+      "free_returns": true,
+      "return_shipping_label": "Provided via email within 24 hours",
+      "refund_processing_time": "5-7 business days after item received",
+      "non_returnable_items": [
+        "Intimate apparel and swimwear",
+        "Personalized or custom-made items",
+        "Perishable goods",
+        "Digital downloads",
+        "Gift cards",
+        "Health and personal care items (opened)"
+      ],
+      "damaged_or_defective": {
+        "policy": "Full refund or replacement",
+        "photo_required": true,
+        "time_to_report": "48 hours of delivery"
+      },
+      "wrong_item": {
+        "policy": "Free return and correct item shipped at no cost",
+        "time_to_report": "7 days of delivery"
+      }
     },
     "refund": {
       "full_refund_conditions": [
-        "Order not delivered within 60 minutes",
-        "Wrong order delivered",
-        "Food quality issues reported within 30 minutes",
-        "Restaurant cancellation"
+        "Item returned within 30 days in original condition",
+        "Defective or damaged item",
+        "Wrong item delivered",
+        "Order cancelled before shipment",
+        "Item not delivered within promised timeframe"
       ],
       "partial_refund_conditions": [
-        "Missing items (refund for missing items only)",
-        "Late delivery (30-60 minutes gets 25% off)",
-        "Cold food (20% refund)"
+        "Item returned without original packaging (10% restocking fee)",
+        "Item shows signs of use (up to 30% deduction)",
+        "Missing accessories or manuals (cost deducted)"
       ],
       "no_refund_conditions": [
-        "Customer unavailable for delivery",
-        "Wrong address provided by customer",
-        "Order cancelled after restaurant preparation"
+        "Return initiated after 30 days",
+        "Item damaged by customer",
+        "Non-returnable items",
+        "Items purchased during final sale"
       ],
-      "refund_processing_time": "3-5 business days"
+      "refund_method": "Original payment method",
+      "refund_processing_time": "5-7 business days",
+      "store_credit_option": "Instant store credit available (10% bonus)"
     },
     "cancellation": {
-      "free_cancellation": "Within 5 minutes of order placement",
-      "partial_charge": "5-15 minutes: 25% charge",
-      "no_cancellation": "After 15 minutes or when food preparation starts"
+      "before_shipment": {
+        "policy": "Full refund, no questions asked",
+        "how_to": "Cancel via order page or contact support"
+      },
+      "after_shipment": {
+        "policy": "Cannot cancel, must return after delivery",
+        "exception": "Can refuse delivery for full refund"
+      },
+      "processing_time": "Cancellation processed within 1 hour",
+      "refund_time": "3-5 business days"
     },
     "payment": {
-      "accepted_methods": ["Credit Card", "Debit Card", "PayPal", "Apple Pay", "Google Pay"],
+      "accepted_methods": [
+        "Credit Cards (Visa, Mastercard, Amex, Discover)",
+        "Debit Cards",
+        "PayPal",
+        "Apple Pay",
+        "Google Pay",
+        "Shop Pay",
+        "Afterpay (Buy Now Pay Later)",
+        "Klarna (Installments)"
+      ],
+      "payment_security": "256-bit SSL encryption, PCI DSS compliant",
       "payment_processing": "Charged when order is confirmed",
-      "tip_policy": "Tips go 100% to delivery driver",
-      "surge_pricing": "During peak hours (11AM-2PM, 6PM-9PM) +$1-3 delivery fee"
+      "installment_plans": {
+        "available_for": "Orders over $100",
+        "options": ["4 interest-free payments", "6-month plan", "12-month plan"],
+        "approval": "Instant approval for qualified customers"
+      },
+      "currency": "USD (automatic conversion available)",
+      "price_match": {
+        "policy": "We match competitor prices",
+        "conditions": "Within 7 days of purchase, proof required",
+        "refund": "Price difference refunded"
+      }
+    },
+    "warranty": {
+      "manufacturer_warranty": "Varies by product (typically 1-2 years)",
+      "extended_warranty": {
+        "available": true,
+        "cost": "10-15% of product price",
+        "coverage": "Up to 3 additional years",
+        "includes": ["Accidental damage", "Power surge", "Normal wear and tear"]
+      },
+      "warranty_claims": "Contact support with proof of purchase and issue description"
+    },
+    "price_protection": {
+      "policy": "If price drops within 14 days of purchase, we refund the difference",
+      "how_to_claim": "Submit request via customer portal",
+      "exclusions": ["Clearance items", "Lightning deals", "Third-party sellers"]
     }
   },
-  "menu_categories": [
+  "product_categories": [
     {
-      "name": "Pizza",
-      "popular_items": ["Margherita Pizza", "Pepperoni Pizza", "Supreme Pizza"],
-      "average_prep_time": "15-20 minutes",
-      "dietary_options": ["Gluten-free crust", "Vegan cheese"]
+      "name": "Electronics",
+      "subcategories": ["Smartphones", "Laptops", "Tablets", "Headphones", "Smart Home", "Cameras"],
+      "popular_brands": ["Apple", "Samsung", "Sony", "Dell", "HP", "Canon"],
+      "warranty": "1-2 years manufacturer warranty",
+      "return_window": "30 days",
+      "special_notes": "All electronics tested before shipping"
     },
     {
-      "name": "Burgers",
-      "popular_items": ["Classic Burger", "Chicken Burger", "Veggie Burger"],
-      "average_prep_time": "10-15 minutes",
-      "dietary_options": ["Plant-based patties", "Gluten-free buns"]
+      "name": "Fashion",
+      "subcategories": ["Men's Clothing", "Women's Clothing", "Shoes", "Accessories", "Jewelry"],
+      "popular_brands": ["Nike", "Adidas", "Levi's", "Zara", "H&M", "Calvin Klein"],
+      "size_guide": "Available on each product page",
+      "return_window": "30 days",
+      "special_notes": "Free size exchange within 30 days"
     },
     {
-      "name": "Asian Cuisine",
-      "popular_items": ["Pad Thai", "Chicken Teriyaki", "Fried Rice"],
-      "average_prep_time": "12-18 minutes",
-      "dietary_options": ["Vegetarian", "Vegan", "Gluten-free"]
+      "name": "Home & Kitchen",
+      "subcategories": ["Furniture", "Kitchen Appliances", "Bedding", "Decor", "Storage"],
+      "popular_brands": ["IKEA", "KitchenAid", "Cuisinart", "Dyson"],
+      "assembly": "Assembly service available for furniture",
+      "return_window": "30 days",
+      "special_notes": "Large items may have additional shipping fees"
     },
     {
-      "name": "Mexican",
-      "popular_items": ["Tacos", "Burritos", "Quesadillas"],
-      "average_prep_time": "8-12 minutes",
-      "dietary_options": ["Vegetarian", "Vegan beans", "Corn tortillas"]
+      "name": "Beauty & Personal Care",
+      "subcategories": ["Skincare", "Makeup", "Hair Care", "Fragrances", "Personal Care"],
+      "popular_brands": ["L'Oreal", "Maybelline", "Neutrogena", "Dove"],
+      "authenticity": "100% authentic products guaranteed",
+      "return_window": "30 days (unopened only)",
+      "special_notes": "Expiry date clearly mentioned"
+    },
+    {
+      "name": "Sports & Outdoors",
+      "subcategories": ["Fitness Equipment", "Sports Gear", "Outdoor Recreation", "Cycling"],
+      "popular_brands": ["Nike", "Adidas", "Under Armour", "The North Face"],
+      "return_window": "30 days",
+      "special_notes": "Expert advice available via chat"
+    },
+    {
+      "name": "Books & Media",
+      "subcategories": ["Books", "E-books", "Movies", "Music", "Video Games"],
+      "formats": ["Physical", "Digital Download"],
+      "return_window": "30 days (physical only, unopened)",
+      "special_notes": "Digital items non-returnable"
     }
   ],
-  "common_issues": {
-    "order_tracking": {
-      "statuses": ["Order Placed", "Restaurant Confirmed", "Preparing", "Out for Delivery", "Delivered"],
-      "tracking_method": "Real-time GPS tracking available in app",
-      "notifications": "SMS and app notifications for status updates"
+  "customer_service": {
+    "contact_methods": {
+      "phone": {
+        "number": "+1-800-SHOPEASE",
+        "hours": "24/7",
+        "average_wait": "2-3 minutes",
+        "languages": ["English", "Spanish", "Hindi"]
+      },
+      "email": {
+        "address": "support@shopease.com",
+        "response_time": "Within 24 hours",
+        "for": "Non-urgent inquiries"
+      },
+      "live_chat": {
+        "availability": "9 AM - 9 PM EST",
+        "response_time": "Instant",
+        "for": "Quick questions and order tracking"
+      },
+      "whatsapp": {
+        "number": "+1-800-SHOPEASE",
+        "availability": "24/7",
+        "features": ["Order tracking", "Voice support", "Quick replies"]
+      },
+      "social_media": {
+        "platforms": ["Facebook", "Twitter", "Instagram"],
+        "response_time": "Within 2 hours during business hours"
+      }
     },
-    "food_quality": {
-      "temperature_guarantee": "Food delivered hot (above 140°F for hot items)",
-      "freshness_policy": "All ingredients prepared fresh daily",
-      "allergen_information": "Available for all menu items",
-      "special_requests": "Customizations available for most items"
-    },
-    "delivery_issues": {
-      "driver_not_found": "We'll find another driver within 10 minutes",
-      "wrong_address": "Customer responsible for additional delivery fee",
-      "access_issues": "Driver will call customer for building access",
-      "weather_delays": "Automatic notifications sent for weather-related delays"
+    "self_service": {
+      "order_tracking": "Real-time tracking via order page",
+      "faq": "Comprehensive FAQ section",
+      "video_tutorials": "Product setup and troubleshooting guides",
+      "community_forum": "Customer community for tips and advice"
     }
   },
   "account_management": {
-    "registration": "Email and phone number required",
-    "password_reset": "Reset link sent to registered email",
-    "profile_updates": "Address, payment methods, dietary preferences",
-    "order_history": "Available for last 12 months",
-    "loyalty_program": {
-      "name": "QuickBite Rewards",
-      "earning": "1 point per $1 spent",
-      "redemption": "100 points = $5 off",
-      "tiers": ["Bronze (0-499 points)", "Silver (500-999 points)", "Gold (1000+ points)"]
+    "registration": {
+      "required_info": ["Email", "Password", "Phone number"],
+      "optional_info": ["Name", "Address", "Birthday"],
+      "benefits": ["Order tracking", "Wishlist", "Faster checkout", "Exclusive deals"]
+    },
+    "profile_management": {
+      "editable_fields": ["Name", "Email", "Phone", "Addresses", "Payment methods"],
+      "privacy": "Data encrypted and never shared with third parties",
+      "delete_account": "Option available in account settings"
+    },
+    "order_history": {
+      "availability": "Lifetime order history",
+      "features": ["Reorder", "Track", "Return", "Review", "Download invoice"]
+    },
+    "wishlist": {
+      "capacity": "Unlimited items",
+      "features": ["Price drop alerts", "Back in stock notifications", "Share with friends"]
+    },
+    "notifications": {
+      "types": ["Order updates", "Shipping notifications", "Delivery alerts", "Promotional offers"],
+      "channels": ["Email", "SMS", "Push notifications", "WhatsApp"],
+      "preferences": "Fully customizable in account settings"
     }
   },
-  "restaurant_partners": [
-    {
-      "name": "Mario's Pizza Palace",
-      "cuisine": "Italian",
-      "rating": 4.5,
-      "delivery_time": "25-35 minutes",
-      "minimum_order": "$15"
+  "loyalty_program": {
+    "name": "ShopEase Rewards",
+    "enrollment": "Free, automatic upon first purchase",
+    "earning": {
+      "purchases": "1 point per $1 spent",
+      "reviews": "50 points per product review",
+      "referrals": "500 points per successful referral",
+      "birthday": "200 bonus points on birthday month"
     },
-    {
-      "name": "Burger Junction",
-      "cuisine": "American",
-      "rating": 4.2,
-      "delivery_time": "20-30 minutes",
-      "minimum_order": "$12"
+    "redemption": {
+      "rate": "100 points = $1 off",
+      "minimum": "500 points to redeem",
+      "expiry": "Points valid for 12 months"
     },
-    {
-      "name": "Spice Garden",
-      "cuisine": "Indian",
-      "rating": 4.7,
-      "delivery_time": "30-40 minutes",
-      "minimum_order": "$18"
-    },
-    {
-      "name": "Taco Fiesta",
-      "cuisine": "Mexican",
-      "rating": 4.3,
-      "delivery_time": "15-25 minutes",
-      "minimum_order": "$10"
-    }
-  ],
+    "tiers": [
+      {
+        "name": "Bronze",
+        "requirement": "0-999 points",
+        "benefits": ["Standard shipping", "Birthday bonus"]
+      },
+      {
+        "name": "Silver",
+        "requirement": "1000-4999 points",
+        "benefits": ["Free standard shipping", "Early sale access", "Birthday bonus"]
+      },
+      {
+        "name": "Gold",
+        "requirement": "5000-9999 points",
+        "benefits": ["Free express shipping", "Priority support", "Exclusive deals", "Birthday bonus"]
+      },
+      {
+        "name": "Platinum",
+        "requirement": "10000+ points",
+        "benefits": ["Free overnight shipping", "VIP support", "Personal shopper", "Exclusive events", "Birthday bonus"]
+      }
+    ]
+  },
   "promotions": {
     "current_offers": [
       {
-        "code": "FIRST20",
+        "code": "WELCOME20",
         "description": "20% off first order",
-        "minimum_order": "$15",
-        "valid_until": "2026-12-31"
+        "minimum_order": "$50",
+        "valid_until": "2026-12-31",
+        "max_discount": "$100"
       },
       {
-        "code": "FREEDELIV",
-        "description": "Free delivery on orders over $20",
-        "minimum_order": "$20",
+        "code": "FREESHIP",
+        "description": "Free standard shipping",
+        "minimum_order": "$25",
         "valid_until": "2026-06-30"
+      },
+      {
+        "code": "SAVE15",
+        "description": "15% off orders over $100",
+        "minimum_order": "$100",
+        "valid_until": "2026-12-31",
+        "max_discount": "$150"
       }
     ],
-    "weekly_deals": "50% off selected restaurants every Tuesday",
-    "student_discount": "15% off with valid student ID"
+    "seasonal_sales": {
+      "black_friday": "Up to 70% off (November)",
+      "cyber_monday": "Electronics deals (November)",
+      "summer_sale": "Up to 50% off (June-July)",
+      "holiday_sale": "Special deals (December)"
+    },
+    "flash_deals": "Daily deals at 12 PM EST, limited quantity",
+    "student_discount": "10% off with valid student ID",
+    "military_discount": "15% off for active military and veterans",
+    "senior_discount": "10% off for customers 65+"
+  },
+  "common_issues": {
+    "order_tracking": {
+      "how_to": "Use order number and email on tracking page",
+      "statuses": ["Order Placed", "Payment Confirmed", "Processing", "Shipped", "Out for Delivery", "Delivered"],
+      "tracking_updates": "Updated every 4-6 hours",
+      "delivery_photo": "Photo proof of delivery provided"
+    },
+    "payment_issues": {
+      "declined_card": "Contact your bank or try another payment method",
+      "pending_payment": "Payment authorization may take 1-2 business days",
+      "double_charge": "Temporary authorization, only one charge will process",
+      "refund_not_received": "Allow 5-7 business days, contact support if delayed"
+    },
+    "delivery_issues": {
+      "package_not_delivered": "Check with neighbors, building office, or contact support",
+      "damaged_package": "Report within 48 hours with photos for replacement",
+      "wrong_address": "Contact support immediately to update address",
+      "delivery_delay": "Automatic notifications sent, compensation may apply",
+      "missing_items": "Report within 7 days for immediate resolution"
+    },
+    "product_issues": {
+      "defective_product": "Free replacement or full refund within 30 days",
+      "wrong_product": "Free return and correct item shipped",
+      "size_issues": "Free size exchange within 30 days",
+      "quality_concerns": "Contact support with photos for resolution"
+    }
+  },
+  "security_and_privacy": {
+    "data_protection": "GDPR and CCPA compliant",
+    "payment_security": "PCI DSS Level 1 certified",
+    "encryption": "256-bit SSL encryption for all transactions",
+    "privacy_policy": "Never sell or share customer data",
+    "two_factor_authentication": "Available for account security",
+    "fraud_protection": "Advanced fraud detection systems"
+  },
+  "sustainability": {
+    "eco_friendly_packaging": "100% recyclable materials",
+    "carbon_neutral_shipping": "Offset carbon emissions for all shipments",
+    "sustainable_products": "Dedicated eco-friendly product section",
+    "recycling_program": "Trade-in program for electronics"
   }
 }

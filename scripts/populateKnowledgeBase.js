@@ -71,13 +71,23 @@ class KnowledgeBasePopulator {
 
       // Process policies - MOST IMPORTANT FOR POLICY QUESTIONS
       if (knowledgeData.policies) {
-        // Delivery policy
-        if (knowledgeData.policies.delivery) {
-          const delivery = knowledgeData.policies.delivery;
+        // Shipping policy
+        if (knowledgeData.policies.shipping) {
+          const shipping = knowledgeData.policies.shipping;
           chunks.push({
             category: 'policy',
-            title: 'Delivery Policy',
-            content: `Delivery Policy: Standard delivery time is ${delivery.standard_time}. We guarantee ${delivery.guarantee}. Delivery fee is ${delivery.delivery_fee}, with free delivery on orders over ${delivery.free_delivery_minimum}. We deliver within ${delivery.coverage_area}. ${delivery.weather_policy}`
+            title: 'Shipping Policy',
+            content: `Shipping Policy: Standard shipping takes ${shipping.standard_shipping.time} and costs ${shipping.standard_shipping.cost} (free over ${shipping.standard_shipping.free_threshold}). Express shipping: ${shipping.express_shipping.time} for ${shipping.express_shipping.cost}. Overnight: ${shipping.overnight_shipping.time} for ${shipping.overnight_shipping.cost}. International: ${shipping.international_shipping.time}. ${shipping.tracking}. Delivery options: ${shipping.delivery_options.join(', ')}.`
+          });
+        }
+
+        // Return policy - CRITICAL
+        if (knowledgeData.policies.return) {
+          const returnPolicy = knowledgeData.policies.return;
+          chunks.push({
+            category: 'policy',
+            title: 'Return Policy',
+            content: `Return Policy: ${returnPolicy.return_window} return window from delivery date. Items must be ${returnPolicy.condition}. Free returns: ${returnPolicy.free_returns}. Return shipping label provided via email within 24 hours. Refund processing: ${returnPolicy.refund_processing_time}. Non-returnable items: ${returnPolicy.non_returnable_items.join(', ')}. Damaged/defective: ${returnPolicy.damaged_or_defective.policy}. Wrong item: ${returnPolicy.wrong_item.policy}.`
           });
         }
 
@@ -87,16 +97,7 @@ class KnowledgeBasePopulator {
           chunks.push({
             category: 'policy',
             title: 'Refund Policy',
-            content: `Refund Policy: Full refunds are provided for: ${refund.full_refund_conditions.join(', ')}. Partial refunds for: ${refund.partial_refund_conditions.join(', ')}. No refunds for: ${refund.no_refund_conditions.join(', ')}. Refund processing time: ${refund.refund_processing_time}.`
-          });
-        }
-
-        // Return policy (part of refund)
-        if (knowledgeData.policies.refund) {
-          chunks.push({
-            category: 'policy',
-            title: 'Return Policy',
-            content: `Return Policy: You can return items within 30 days of delivery. Full refunds are provided for wrong orders, quality issues, or non-delivery. Returns must be initiated within the return window. Refunds take ${knowledgeData.policies.refund.refund_processing_time} to process.`
+            content: `Refund Policy: Full refunds for: ${refund.full_refund_conditions.join(', ')}. Partial refunds for: ${refund.partial_refund_conditions.join(', ')}. No refunds for: ${refund.no_refund_conditions.join(', ')}. Refund method: ${refund.refund_method}. Processing time: ${refund.refund_processing_time}. Store credit option: ${refund.store_credit_option}.`
           });
         }
 
@@ -106,7 +107,7 @@ class KnowledgeBasePopulator {
           chunks.push({
             category: 'policy',
             title: 'Cancellation Policy',
-            content: `Cancellation Policy: Free cancellation ${cancel.free_cancellation}. ${cancel.partial_charge}. ${cancel.no_cancellation}.`
+            content: `Cancellation Policy: Before shipment: ${cancel.before_shipment.policy}. How to cancel: ${cancel.before_shipment.how_to}. After shipment: ${cancel.after_shipment.policy}. Exception: ${cancel.after_shipment.exception}. Processing time: ${cancel.processing_time}. Refund time: ${cancel.refund_time}.`
           });
         }
 
@@ -116,18 +117,38 @@ class KnowledgeBasePopulator {
           chunks.push({
             category: 'policy',
             title: 'Payment Policy',
-            content: `Payment Policy: We accept ${payment.accepted_methods.join(', ')}. ${payment.payment_processing}. ${payment.tip_policy}. ${payment.surge_pricing}.`
+            content: `Payment Policy: Accepted methods: ${payment.accepted_methods.join(', ')}. Security: ${payment.payment_security}. Processing: ${payment.payment_processing}. Installment plans available for orders over $100: ${payment.installment_plans.options.join(', ')}. Currency: ${payment.currency}. Price match: ${payment.price_match.policy}.`
+          });
+        }
+
+        // Warranty policy
+        if (knowledgeData.policies.warranty) {
+          const warranty = knowledgeData.policies.warranty;
+          chunks.push({
+            category: 'policy',
+            title: 'Warranty Policy',
+            content: `Warranty Policy: Manufacturer warranty: ${warranty.manufacturer_warranty}. Extended warranty available: ${warranty.extended_warranty.available}, costs ${warranty.extended_warranty.cost}, coverage up to ${warranty.extended_warranty.coverage}. Includes: ${warranty.extended_warranty.includes.join(', ')}. Claims: ${warranty.warranty_claims}.`
+          });
+        }
+
+        // Price protection
+        if (knowledgeData.policies.price_protection) {
+          const priceProtection = knowledgeData.policies.price_protection;
+          chunks.push({
+            category: 'policy',
+            title: 'Price Protection Policy',
+            content: `Price Protection: ${priceProtection.policy}. How to claim: ${priceProtection.how_to_claim}. Exclusions: ${priceProtection.exclusions.join(', ')}.`
           });
         }
       }
 
-      // Process menu categories
-      if (knowledgeData.menu_categories) {
-        knowledgeData.menu_categories.forEach(category => {
+      // Process product categories
+      if (knowledgeData.product_categories) {
+        knowledgeData.product_categories.forEach(category => {
           chunks.push({
-            category: 'menu',
-            title: `${category.name} Menu`,
-            content: `${category.name}: Popular items include ${category.popular_items.join(', ')}. Average prep time: ${category.average_prep_time}. Dietary options: ${category.dietary_options.join(', ')}.`
+            category: 'products',
+            title: `${category.name} Category`,
+            content: `${category.name}: Subcategories include ${(category.subcategories || []).join(', ')}. Popular brands: ${(category.popular_brands || []).join(', ')}. Warranty: ${category.warranty || 'N/A'}. Return window: ${category.return_window || 'N/A'}. ${category.special_notes || ''}.`
           });
         });
       }
@@ -153,12 +174,37 @@ class KnowledgeBasePopulator {
         });
       }
 
+      // Process customer service
+      if (knowledgeData.customer_service) {
+        const cs = knowledgeData.customer_service;
+        chunks.push({
+          category: 'support',
+          title: 'Customer Service Contact Methods',
+          content: `Customer Service: Phone: ${cs.contact_methods?.phone?.number || 'N/A'} (${cs.contact_methods?.phone?.hours || 'N/A'}). Email: ${cs.contact_methods?.email?.address || 'N/A'} (response within ${cs.contact_methods?.email?.response_time || 'N/A'}). Live chat: ${cs.contact_methods?.live_chat?.availability || 'N/A'}. WhatsApp: ${cs.contact_methods?.whatsapp?.number || 'N/A'} (24/7). Languages: ${(cs.contact_methods?.phone?.languages || []).join(', ')}.`
+        });
+      }
+
+      // Process loyalty program
+      if (knowledgeData.loyalty_program) {
+        const loyalty = knowledgeData.loyalty_program;
+        chunks.push({
+          category: 'loyalty',
+          title: 'Loyalty Program',
+          content: `${loyalty.name}: Free enrollment. Earn ${loyalty.earning?.purchases || ''}, ${loyalty.earning?.reviews || ''}, ${loyalty.earning?.referrals || ''}, ${loyalty.earning?.birthday || ''}. Redemption: ${loyalty.redemption?.rate || ''}, minimum ${loyalty.redemption?.minimum || ''}. Tiers: ${(loyalty.tiers || []).map(t => `${t.name} (${t.requirement}): ${(t.benefits || []).join(', ')}`).join(' | ')}.`
+        });
+      }
+
       // Process promotions
       if (knowledgeData.promotions) {
+        const promos = knowledgeData.promotions;
+        const currentOffers = (promos.current_offers || []).map(o => 
+          `${o.code}: ${o.description} (min order: ${o.minimum_order}, valid until: ${o.valid_until})`
+        ).join(' | ');
+        
         chunks.push({
           category: 'promotions',
-          title: 'Current Promotions',
-          content: JSON.stringify(knowledgeData.promotions)
+          title: 'Current Promotions and Discounts',
+          content: `Current Offers: ${currentOffers}. Seasonal sales: ${Object.entries(promos.seasonal_sales || {}).map(([k,v]) => `${k}: ${v}`).join(', ')}. Flash deals: ${promos.flash_deals || 'N/A'}. Student discount: ${promos.student_discount || 'N/A'}. Military discount: ${promos.military_discount || 'N/A'}. Senior discount: ${promos.senior_discount || 'N/A'}.`
         });
       }
 
