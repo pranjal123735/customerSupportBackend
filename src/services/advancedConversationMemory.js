@@ -114,8 +114,22 @@ class AdvancedConversationMemory {
       await this.mongoClient.connect();
       this.db = this.mongoClient.db('ecommerce_rag');
 
-      await this.db.collection('conversations').createIndex({ userId: 1 }, { unique: true });
-      await this.db.collection('conversations').createIndex({ lastUpdated: 1 });
+      // Create indexes only if they don't exist
+      try {
+        const existingIndexes = await this.db.collection('conversations').indexes();
+        const hasUserIdIndex = existingIndexes.some(idx => idx.key.userId === 1);
+        const hasLastUpdatedIndex = existingIndexes.some(idx => idx.key.lastUpdated === 1);
+
+        if (!hasUserIdIndex) {
+          await this.db.collection('conversations').createIndex({ userId: 1 }, { unique: true });
+        }
+        if (!hasLastUpdatedIndex) {
+          await this.db.collection('conversations').createIndex({ lastUpdated: 1 });
+        }
+      } catch (indexErr) {
+        // Indexes might already exist, continue anyway
+        console.log('ℹ️  ConversationMemory: Indexes already exist or error creating them');
+      }
 
       this.mongoReady = true;
       console.log('✅ ConversationMemory: MongoDB connected');
