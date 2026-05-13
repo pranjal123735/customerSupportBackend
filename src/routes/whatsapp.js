@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const whatsappService = require('../services/whatsappService');
 const voiceProcessor = require('../services/voiceProcessor');
+const advancedMemory = require('../services/advancedConversationMemory');
 
 // Webhook verification (GET)
 router.get('/', (req, res) => {
@@ -123,8 +124,15 @@ async function processCustomerRequest(input, customerPhone) {
     // Wait for agent to be initialized
     await customerSupportAgent.waitForInitialization();
     
+    // Get conversation history for this user
+    const conversationHistory = await advancedMemory.getHistory(customerPhone);
+    const stats = await advancedMemory.getStats(customerPhone);
+    
+    console.log(`📚 Conversation: ${stats.totalMessages} total messages (${stats.messageCount} recent, ${stats.summaryCount} summaries)`);
+    console.log(`🎯 Context: Orders [${stats.orderIds.join(', ')}], Sentiment: ${stats.currentSentiment}, Unresolved: ${stats.unresolvedIssues}`);
+    
     // Use the AI customer support agent to generate response
-    const aiResponse = await customerSupportAgent.handleCustomerMessage(input, customerPhone, []);
+    const aiResponse = await customerSupportAgent.handleCustomerMessage(input, customerPhone, conversationHistory);
     
     // Extract the response text from the AI response object
     let responseText;
@@ -137,6 +145,10 @@ async function processCustomerRequest(input, customerPhone) {
     } else {
       responseText = JSON.stringify(aiResponse);
     }
+    
+    // Add both user message and agent response to advanced memory
+    await advancedMemory.addMessage(customerPhone, 'user', input);
+    await advancedMemory.addMessage(customerPhone, 'assistant', responseText);
     
     console.log(`✅ Generated response: "${responseText}"`);
     

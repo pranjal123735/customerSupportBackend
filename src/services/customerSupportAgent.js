@@ -132,29 +132,61 @@ class CustomerSupportAgent {
       }
       ticket.lastMessage = userMessage;
       
-      // Step 2: Extract order ID from message or conversation history (for context)
+      // Step 2: Get optimized conversation context from memory service
+      const conversationMemory = require('./conversationMemoryService');
+      const optimizedContext = conversationMemory.getOptimizedContext(userId);
+      
+      // Extract order ID from current message first
       let extractedOrderId = null;
       const orderMatch = userMessage.match(/\b(\d{3,4})\b/);
       if (orderMatch) {
         extractedOrderId = parseInt(orderMatch[1]);
-      } else if (conversationHistory.length > 0) {
-        // Look for order ID in recent conversation
-        for (let i = conversationHistory.length - 1; i >= 0; i--) {
-          const msg = conversationHistory[i];
-          const match = msg.content.match(/order\s*#?(\d{3,4})|#(\d{3,4})/i);
-          if (match) {
-            extractedOrderId = parseInt(match[1] || match[2]);
-            console.log(`🔧 Context extraction: Found order_id ${extractedOrderId} from conversation history`);
-            break;
-          }
+      }
+      
+      // If no order ID in current message, use from metadata
+      if (!extractedOrderId && optimizedContext.metadata.currentOrderId) {
+        extractedOrderId = optimizedContext.metadata.currentOrderId;
+        console.log(`🔖 Using current order from context: ${extractedOrderId}`);
+      }
+      
+      // Step 3: Build conversation context with summary and order timeline
+      let conversationContext = '';
+      
+      // Add summary for long conversations
+      if (optimizedContext.summary) {
+        conversationContext += `\n[CONVERSATION SUMMARY]\n${optimizedContext.summary}\n`;
+      }
+      
+      // Add ALL order mentions timeline (CRITICAL for long conversations)
+      if (optimizedContext.allOrderMentions && optimizedContext.allOrderMentions.length > 0) {
+        conversationContext += `\n[ORDER TIMELINE - ALL MENTIONS]\n`;
+        const uniqueOrders = [...new Set(optimizedContext.allOrderMentions.map(m => m.orderId))];
+        uniqueOrders.forEach(orderId => {
+          const mentions = optimizedContext.allOrderMentions.filter(m => m.orderId === orderId);
+          const turns = mentions.map(m => m.turnNumber).join(', ');
+          conversationContext += `- Order #${orderId}: Mentioned in turn(s) ${turns}\n`;
+        });
+      }
+      
+      // Add current context metadata
+      if (optimizedContext.metadata.currentOrderId) {
+        conversationContext += `\n[CURRENT CONTEXT]\n`;
+        conversationContext += `- Current Order: #${optimizedContext.metadata.currentOrderId}\n`;
+        if (optimizedContext.metadata.previousOrderIds.length > 0) {
+          conversationContext += `- Previous Orders: ${optimizedContext.metadata.previousOrderIds.join(', ')}\n`;
+        }
+        if (optimizedContext.metadata.lastAction) {
+          conversationContext += `- Last Action: ${optimizedContext.metadata.lastAction}\n`;
         }
       }
       
-      // Step 3: Build conversation context
-      let conversationContext = '';
-      if (conversationHistory.length > 0) {
-        conversationContext = '\n\nRecent conversation:\n' + 
-          conversationHistory.slice(-3).map(msg => `${msg.role}: ${msg.content}`).join('\n');
+      // Add recent messages (last 5)
+      if (optimizedContext.messages.length > 0) {
+        conversationContext += `\n[RECENT CONVERSATION]\n`;
+        optimizedContext.messages.forEach(msg => {
+          const role = msg.role === 'user' ? 'Customer' : 'Agent';
+          conversationContext += `${role}: ${msg.content}\n`;
+        });
       }
       
       // Step 4: Detect language and sentiment in parallel (FAST - no LLM)
@@ -192,6 +224,7 @@ RULES:
 - If wants refund → tool: "processRefund"
 - If general greeting or simple question → tool: "directResponse"
 - If customer is answering a question (like just "1"), infer from conversation history
+- IMPORTANT: Use the Current Order from context if no order mentioned in current message
 
 Return ONLY valid JSON:`;
 
