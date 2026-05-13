@@ -132,61 +132,29 @@ class CustomerSupportAgent {
       }
       ticket.lastMessage = userMessage;
       
-      // Step 2: Get optimized conversation context from memory service
-      const conversationMemory = require('./conversationMemoryService');
-      const optimizedContext = conversationMemory.getOptimizedContext(userId);
-      
-      // Extract order ID from current message first
+      // Step 2: Extract order ID from message or conversation history
       let extractedOrderId = null;
       const orderMatch = userMessage.match(/\b(\d{3,4})\b/);
       if (orderMatch) {
         extractedOrderId = parseInt(orderMatch[1]);
+      } else if (conversationHistory.length > 0) {
+        // Look for order ID in recent conversation
+        for (let i = conversationHistory.length - 1; i >= 0; i--) {
+          const msg = conversationHistory[i];
+          const match = msg.content.match(/order\s*#?(\d{3,4})|#(\d{3,4})/i);
+          if (match) {
+            extractedOrderId = parseInt(match[1] || match[2]);
+            console.log(`🔧 Context extraction: Found order_id ${extractedOrderId} from conversation history`);
+            break;
+          }
+        }
       }
       
-      // If no order ID in current message, use from metadata
-      if (!extractedOrderId && optimizedContext.metadata.currentOrderId) {
-        extractedOrderId = optimizedContext.metadata.currentOrderId;
-        console.log(`🔖 Using current order from context: ${extractedOrderId}`);
-      }
-      
-      // Step 3: Build conversation context with summary and order timeline
+      // Step 3: Build conversation context
       let conversationContext = '';
-      
-      // Add summary for long conversations
-      if (optimizedContext.summary) {
-        conversationContext += `\n[CONVERSATION SUMMARY]\n${optimizedContext.summary}\n`;
-      }
-      
-      // Add ALL order mentions timeline (CRITICAL for long conversations)
-      if (optimizedContext.allOrderMentions && optimizedContext.allOrderMentions.length > 0) {
-        conversationContext += `\n[ORDER TIMELINE - ALL MENTIONS]\n`;
-        const uniqueOrders = [...new Set(optimizedContext.allOrderMentions.map(m => m.orderId))];
-        uniqueOrders.forEach(orderId => {
-          const mentions = optimizedContext.allOrderMentions.filter(m => m.orderId === orderId);
-          const turns = mentions.map(m => m.turnNumber).join(', ');
-          conversationContext += `- Order #${orderId}: Mentioned in turn(s) ${turns}\n`;
-        });
-      }
-      
-      // Add current context metadata
-      if (optimizedContext.metadata.currentOrderId) {
-        conversationContext += `\n[CURRENT CONTEXT]\n`;
-        conversationContext += `- Current Order: #${optimizedContext.metadata.currentOrderId}\n`;
-        if (optimizedContext.metadata.previousOrderIds.length > 0) {
-          conversationContext += `- Previous Orders: ${optimizedContext.metadata.previousOrderIds.join(', ')}\n`;
-        }
-        if (optimizedContext.metadata.lastAction) {
-          conversationContext += `- Last Action: ${optimizedContext.metadata.lastAction}\n`;
-        }
-      }
-      
-      // Add recent messages (last 5)
-      if (optimizedContext.messages.length > 0) {
-        conversationContext += `\n[RECENT CONVERSATION]\n`;
-        optimizedContext.messages.forEach(msg => {
-          const role = msg.role === 'user' ? 'Customer' : 'Agent';
-          conversationContext += `${role}: ${msg.content}\n`;
-        });
+      if (conversationHistory.length > 0) {
+        conversationContext = '\n\nRecent conversation:\n' + 
+          conversationHistory.slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
       }
       
       // Step 4: Detect language and sentiment in parallel (FAST - no LLM)
@@ -204,8 +172,20 @@ class CustomerSupportAgent {
       // Step 5: AI decides what tool to use (ONE LLM CALL)
       const toolDecisionPrompt = `You are a customer support agent. Analyze this message and decide what action to take.
 
+CRITICAL RULE — CONTEXT RESOLUTION:
+Before calling ANY tool, check the conversation history and resolve all references:
+- "it", "that", "this one", "the order", "my order" → look at last mentioned order ID in conversation
+- "when was it cancelled" → use the last order ID discussed
+- "track this one" → use the last order ID discussed  
+- "what about it" → use the last order ID discussed
+- NEVER ask the customer for an order number if it was already mentioned in this conversation
+- If conversation history shows order #1001 was discussed, then "it" = order #1001
+
+If you already have the order ID from conversation history, use it directly in the orderId field.
+Only set orderId to null if NO order has EVER been mentioned in this conversation.
+
 CONTEXT:
-${extractedOrderId ? `- Customer mentioned order #${extractedOrderId} in this conversation` : ''}
+${extractedOrderId ? `- Order #${extractedOrderId} was mentioned in this conversation (USE THIS!)` : ''}
 ${conversationContext}
 
 Customer message: "${userMessage}"
@@ -213,7 +193,7 @@ Customer message: "${userMessage}"
 Return ONLY a JSON object:
 {
   "tool": "<searchKnowledgeBase|getOrderDetails|cancelOrder|processRefund|directResponse>",
-  "orderId": <number or null>,
+  "orderId": <number or null - USE ORDER FROM CONTEXT IF AVAILABLE>,
   "query": "<search query if using searchKnowledgeBase>"
 }
 
@@ -223,8 +203,10 @@ RULES:
 - If wants to cancel order → tool: "cancelOrder"
 - If wants refund → tool: "processRefund"
 - If general greeting or simple question → tool: "directResponse"
+- If customer uses pronouns ("it", "this", "that"), resolve from conversation history FIRST
 - If customer is answering a question (like just "1"), infer from conversation history
-- IMPORTANT: Use the Current Order from context if no order mentioned in current message
+
+CRITICAL: If extractedOrderId is provided above, YOU MUST use it in the orderId field!
 
 Return ONLY valid JSON:`;
 
